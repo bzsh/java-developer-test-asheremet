@@ -40,7 +40,7 @@ public class PrometheusTweetAggregator implements TweetAggregator {
      */
     private final Histogram tweetsLengthWords;
 
-    PrometheusTweetAggregator() {
+     PrometheusTweetAggregator() {
         tweetsTotal = Counter.build()
                 .help("Total tweets processed by topic")
                 .namespace("twitter_stream")
@@ -78,6 +78,5 @@ public class PrometheusTweetAggregator implements TweetAggregator {
     }
 
     private void calculateTweetsLengthCharacters() {
-
     }
 }

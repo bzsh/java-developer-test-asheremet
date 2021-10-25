@@ -41,11 +41,9 @@ public class Main
         // Аналогично эти же опции можно настроить в IDE
         String apiKey = checkNotNull(System.getProperty("api.key"), "Property api.key is missing");
         String secretKey = checkNotNull(System.getProperty("secret.key"), "Property secret.key is missing");
-        System.out.println(apiKey);
-        System.out.println(secretKey);
 //
 //        // Создаем и настраиваем TwitterStreamConnector
-//        TwitterStreamConnector connector = new TwitterStreamConnectorFactory().createConnector(apiKey, secretKey);
+        TwitterStreamConnector connector = new TwitterStreamConnectorFactory().createConnector(apiKey, secretKey);
 
 
 
@@ -53,8 +51,7 @@ public class Main
         //
         //
 
-        String bearerTokenBody = new TwitterStreamConnectorFactory().getBearerToken(apiKey, secretKey);
-        System.out.println(bearerTokenBody);
+
 
         //
         //
@@ -77,13 +74,13 @@ public class Main
         //  curl localhost:8080/metrics
         // Либо открыть этот адрес в браузере.
         // HTTPServer запускается в daemon режиме, это значит, что он не будет блокировать текущий поток.
-//        new HTTPServer(8080, true);
+        new HTTPServer(8080, true);
 
 
         // Создаем обработчик твитов, в нем будет происходить подсчет всех метрик, требуемых в задании.
-//        TweetAggregator aggregator = new TweetAggregatorFactory().createPrometheusAggregator();
+        TweetAggregator aggregator = new TweetAggregatorFactory().createPrometheusAggregator();
 
-//        connector.listenStream(rules, aggregator::aggregateTweet);
+        connector.listenStream(rules, aggregator::aggregateTweet);
 
     }
 
