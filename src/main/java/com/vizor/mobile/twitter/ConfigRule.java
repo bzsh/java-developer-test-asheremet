@@ -3,27 +3,23 @@ package com.vizor.mobile.twitter;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ConfigRule implements Rule
-{
+public class ConfigRule implements Rule {
     private String id;
     private String value;
     private String tag;
 
     @Override
-    public String getValue()
-    {
+    public String getValue() {
         return value;
     }
 
     @Override
-    public String getTag()
-    {
+    public String getTag() {
         return tag;
     }
 
     @Override
-    public Optional<String> getId()
-    {
+    public Optional<String> getId() {
         return Optional.of(id);
     }
 

@@ -4,16 +4,25 @@ import java.util.List;
 import java.util.Objects;
 
 public class ConfigTweet implements Tweet{
+    private String id;
     private String text;
     private List<Rule> matchingRules;
     @Override
     public String getText() {
-        return null;
+        return text;
     }
 
     @Override
     public List<Rule> getMatchingRules() {
-        return null;
+        return matchingRules;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setText(String text) {

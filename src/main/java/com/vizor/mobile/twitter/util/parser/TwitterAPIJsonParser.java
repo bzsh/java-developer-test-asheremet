@@ -1,14 +1,16 @@
 package com.vizor.mobile.twitter.util.parser;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import com.vizor.mobile.twitter.ConfigRule;
+import com.vizor.mobile.twitter.ConfigTweet;
 import com.vizor.mobile.twitter.Rule;
+import com.vizor.mobile.twitter.Tweet;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TwitterAPIJsonParser {
     public static String parseJsonWithToken(String json) {
@@ -20,32 +22,28 @@ public class TwitterAPIJsonParser {
         List<Rule> rules = new ArrayList<>();
         if (null != json) {
             JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
-            JsonArray array = jsonObject.getAsJsonArray("data");
-            if (array != null) {
-                for (JsonElement element : array) {
-                    JsonObject object = element.getAsJsonObject();
-                    ConfigRule configRule = new ConfigRule();
-                    configRule.setId(object.get("id").getAsString());
-                    configRule.setTag(object.get("tag").getAsString());
-                    configRule.setValue(object.get("value").getAsString());
-                    rules.add(configRule);
-                }
-            }
+            JsonArray arr = jsonObject.getAsJsonArray("data");
+            Type type = new TypeToken<List<ConfigRule>>() {
+            }.getType();
+            rules = new Gson().fromJson(arr, type);
         }
         return rules;
     }
 
+    public static Tweet parseJsonWithTweet(String json) {
+        JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
+        JsonObject dataObject = jsonObject.getAsJsonObject("data");
+        JsonArray rulesObject = jsonObject.getAsJsonArray("matching_rules");
+        Type type = new TypeToken<List<ConfigRule>>() {
+        }.getType();
+        List<Rule> rules = new Gson().fromJson(rulesObject, type);
+        ConfigTweet tweet = new Gson().fromJson(dataObject, ConfigTweet.class);
+        tweet.setMatchingRules(rules);
+        return tweet;
+    }
+
     public static String getAddRulesJson(List<Rule> rules) {
-        String add = "{\"add\": [%s]}";
-        return getResultJsonString(add, rules);
-    }
-
-    public static String getDeleteRulesJson(List<Rule> rules) {
-        String delete = "{ \"delete\": { \"ids\": [%s]}}";
-        return getResultJsonString(delete, rules);
-    }
-
-    private static String getResultJsonString(String format, List<Rule> rules) {
+        String format = "{\"add\": [%s]}";
         if (rules.size() == 1) {
             String value = rules.get(0).getValue();
             String tag = rules.get(0).getTag();
@@ -56,6 +54,24 @@ public class TwitterAPIJsonParser {
                 String value = rule.getValue();
                 String tag = rule.getTag();
                 sb.append("{\"value\": \"").append(value).append("\", \"tag\": \"").append(tag).append("\"}").append(",");
+            }
+            String result = sb.toString();
+            return String.format(format, result.substring(0, result.length() - 1));
+        }
+    }
+
+    public static String getDeleteRulesJson(List<Rule> rules) {
+        String format = "{\"delete\": { \"ids\": [%s]}}";
+        if (rules.size() == 1) {
+            Optional<String> value = rules.get(0).getId();
+            String id = value.orElse("");
+            return String.format(format, "\"" + id + "\"");
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (Rule rule : rules) {
+                Optional<String> value = rule.getId();
+                String id = value.orElse("");
+                sb.append("\"").append(id).append("\"").append(",");
             }
             String result = sb.toString();
             return String.format(format, result.substring(0, result.length() - 1));

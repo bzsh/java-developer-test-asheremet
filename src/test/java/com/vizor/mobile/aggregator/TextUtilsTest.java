@@ -4,12 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TextUtilsTest
-{
+class TextUtilsTest {
 
     @Test
-    void wordCount()
-    {
+    void wordCount() {
         assertEquals(1, TextUtils.wordCount("word"));
         assertEquals(2, TextUtils.wordCount("word word"));
         assertEquals(2, TextUtils.wordCount("word  word"));
