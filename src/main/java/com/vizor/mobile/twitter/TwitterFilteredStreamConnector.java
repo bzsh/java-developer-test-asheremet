@@ -40,7 +40,7 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector {
     public void listenStream(List<Rule> ruleList, Consumer<Tweet> streamConsumer) {
         String bearerToken = getBearerToken(apiKey, secretKey);
         setupRules(bearerToken, ruleList);
-        connectStream(bearerToken);
+        connectStream(bearerToken, streamConsumer);
     }
 
     public String getBearerToken(String apiKey, String secretKey) {
@@ -56,7 +56,6 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector {
         try {
             HttpResponse<String> response = client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
             token = TwitterAPIJsonParser.parseJsonWithToken(response.body());
-            System.out.println("This is response body, getBearerToken() method: " + response.body());                         //todo
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -79,24 +78,15 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector {
 
     public void deleteRules(String bearerToken, List<Rule> rules) {
         String json = TwitterAPIJsonParser.getDeleteRulesJson(rules);
-        HttpClient client = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(5))
-                .build();
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .uri(URI.create(HOST + RULES_ENDPOINT))
-                .setHeader(CONTENT_HEADER, CONTENT_HEADER_VALUE)
-                .setHeader(AUTH_HEADER, PREFIX_BEARER + bearerToken);
-        try {
-            HttpResponse<String> response = client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-            System.out.println("This is response body, deleteRules() method: " + response.body());                         //todo
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        sendPost(bearerToken, json);
     }
 
     public void createRules(String bearerToken, List<Rule> rules) {
         String json = TwitterAPIJsonParser.getAddRulesJson(rules);
+        sendPost(bearerToken, json);
+    }
+
+    private void sendPost(String bearerToken, String json) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
@@ -106,8 +96,7 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector {
                 .setHeader(CONTENT_HEADER, CONTENT_HEADER_VALUE)
                 .setHeader(AUTH_HEADER, PREFIX_BEARER + bearerToken);
         try {
-            HttpResponse<String> response = client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-            System.out.println("This is response body, createRules() method: " + response.body());                         //todo
+            client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -125,7 +114,6 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector {
         try {
             HttpResponse<String> response = client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
             String body = response.body();
-            System.out.println("This is response body, getRules() method: " + body);                                       //todo
             rules = TwitterAPIJsonParser.parseJsonWithRules(body);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -133,8 +121,7 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector {
         return rules;
     }
 
-    public void connectStream(String bearerToken) {              // todo ??????????????????????????
-        int lineCounter = 1;
+    public void connectStream(String bearerToken, Consumer<Tweet> tweetConsumer) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
@@ -147,12 +134,9 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector {
             HttpResponse<InputStream> responseToStream = client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofInputStream());
             BufferedReader reader = new BufferedReader(new InputStreamReader(responseToStream.body()));
             String line = reader.readLine();
-            while (line != null) {
-                System.out.println(line);                                          //todo
-                if (lineCounter == 20) {
-                    return;
-                }
-                lineCounter++;
+            while (null != line && !line.isEmpty()) {
+                Tweet tweet = TwitterAPIJsonParser.parseJsonWithTweet(line);
+                tweetConsumer.accept(tweet);
                 line = reader.readLine();
             }
         } catch (IOException | InterruptedException e) {

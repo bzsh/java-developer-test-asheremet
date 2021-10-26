@@ -35,7 +35,7 @@ public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
         // Читаем данные для авторизации в Twitter API. Задавать их можно через Java Options запуская приложение
         // следующим образом:
-        //   _JAVA_OPTIONS="-Dapi.key=... -Dsecret.key=..." ./gradlew run
+        // _JAVA_OPTIONS="-Dapi.key=... -Dsecret.key=..." ./gradlew run
         // Аналогично эти же опции можно настроить в IDE
         String apiKey = checkNotNull(System.getProperty("api.key"), "Property api.key is missing");
         String secretKey = checkNotNull(System.getProperty("secret.key"), "Property secret.key is missing");
@@ -49,7 +49,6 @@ public class Main {
             }.getType();
             InputStreamReader reader = new InputStreamReader(checkNotNull(rulesStream, "Can't find /rules.json"));
             rules = new Gson().fromJson(reader, type);
-            System.out.println(rules.get(0).toString());
 
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);

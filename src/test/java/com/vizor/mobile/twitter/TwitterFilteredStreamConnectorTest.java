@@ -42,6 +42,7 @@ class TwitterFilteredStreamConnectorTest {
     @Test
     void getRules() {
         List<Rule> ruleList = connector.getRules(bearerToken);
+        ruleList.forEach(System.out::println);
     }
 
     @Test
@@ -57,6 +58,6 @@ class TwitterFilteredStreamConnectorTest {
 
     @Test
     void connectToStream() {
-        connector.connectStream(bearerToken);
+        connector.connectStream(bearerToken, null);
     }
 }

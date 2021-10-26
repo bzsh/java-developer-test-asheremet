@@ -23,22 +23,26 @@ public class TwitterAPIJsonParser {
         if (null != json) {
             JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
             JsonArray arr = jsonObject.getAsJsonArray("data");
-            Type type = new TypeToken<List<ConfigRule>>() {
-            }.getType();
+            if (arr == null) return rules;
+            Type type = new TypeToken<List<ConfigRule>>() {}.getType();
             rules = new Gson().fromJson(arr, type);
         }
         return rules;
     }
 
     public static Tweet parseJsonWithTweet(String json) {
-        JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
-        JsonObject dataObject = jsonObject.getAsJsonObject("data");
-        JsonArray rulesObject = jsonObject.getAsJsonArray("matching_rules");
-        Type type = new TypeToken<List<ConfigRule>>() {
-        }.getType();
-        List<Rule> rules = new Gson().fromJson(rulesObject, type);
-        ConfigTweet tweet = new Gson().fromJson(dataObject, ConfigTweet.class);
-        tweet.setMatchingRules(rules);
+        ConfigTweet tweet = new ConfigTweet();
+        if (null != json) {
+            JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
+            JsonObject dataObject = jsonObject.getAsJsonObject("data");
+            JsonArray rulesObject = jsonObject.getAsJsonArray("matching_rules");
+            if (dataObject == null || rulesObject == null) return tweet;
+            Type type = new TypeToken<List<ConfigRule>>() {}.getType();
+            List<Rule> rules = new Gson().fromJson(rulesObject, type);
+            tweet = new Gson().fromJson(dataObject, ConfigTweet.class);
+            tweet.setMatchingRules(rules);
+            return tweet;
+        }
         return tweet;
     }
 

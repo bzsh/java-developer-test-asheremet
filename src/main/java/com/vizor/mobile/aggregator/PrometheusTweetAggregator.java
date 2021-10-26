@@ -5,7 +5,6 @@ import com.vizor.mobile.twitter.Tweet;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 
-import java.util.Random;
 
 /**
  * Собирает информацию о полученных твитах в Prometheus метрики.
@@ -40,7 +39,7 @@ public class PrometheusTweetAggregator implements TweetAggregator {
      */
     private final Histogram tweetsLengthWords;
 
-     PrometheusTweetAggregator() {
+    PrometheusTweetAggregator() {
         tweetsTotal = Counter.build()
                 .help("Total tweets processed by topic")
                 .namespace("twitter_stream")
@@ -65,18 +64,31 @@ public class PrometheusTweetAggregator implements TweetAggregator {
     @Override
     public void aggregateTweet(Tweet tweet) {
         countTweets();
-        calculateTweetsLengthCharacters();
-        calculateTweetsLengthWords(tweet.getText());
-//        throw new UnsupportedOperationException("Unimplemented");
+        for (Rule rule : tweet.getMatchingRules()) {
+            calculateTweetsLengthCharacters(tweet.getText(), rule.getTag());
+            calculateTweetsLengthWords(tweet.getText(), rule.getTag());
+        }
     }
 
     private void countTweets() {
         tweetsTotal.inc();
     }
 
-    private void calculateTweetsLengthWords(String text) {
+    private void calculateTweetsLengthWords(String text, String tag) {
+        Histogram.Timer requestTimer = tweetsLengthWords.labels(tag).startTimer();
+        try {
+            tweetsLengthWords.labels(tag).observe(TextUtils.wordCount(text));
+        } finally {
+            requestTimer.observeDuration();
+        }
     }
 
-    private void calculateTweetsLengthCharacters() {
+    private void calculateTweetsLengthCharacters(String text, String tag) {
+        Histogram.Timer requestTimer = tweetsLengthCharacters.labels(tag).startTimer();
+        try {
+            tweetsLengthCharacters.labels(tag).observe(TextUtils.charsCount(text));
+        } finally {
+            requestTimer.observeDuration();
+        }
     }
 }
