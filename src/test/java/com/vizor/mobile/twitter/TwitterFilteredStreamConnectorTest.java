@@ -30,9 +30,13 @@ class TwitterFilteredStreamConnectorTest {
 
     @Test
     void getRules() {
-       List<String> list =  connector.getRules("AAAAAAAAAAAAAAAAAAAAAOskVAEAAAAALQ948IiuroOpdocf7fKsAYt04Kg%3DQ5VaeaEtwWvJVECIwp4I2UQjieqnTR5a3q8vUnR15WcwEAdVaD");
-        for (String s : list) {
-            System.out.println(s);
+       List<Rule> ruleList =  connector.getRules("AAAAAAAAAAAAAAAAAAAAAOskVAEAAAAALQ948IiuroOpdocf7fKsAYt04Kg%3DQ5VaeaEtwWvJVECIwp4I2UQjieqnTR5a3q8vUnR15WcwEAdVaD");
+        System.out.println("List with rules length is : " + ruleList.size());
+        System.out.println("Is list is empty ? : " + ruleList.isEmpty());
+        for (Rule r : ruleList) {
+            System.out.println(r.getId());
+            System.out.println(r.getTag());
+            System.out.println(r.getValue());
         }
     }
 

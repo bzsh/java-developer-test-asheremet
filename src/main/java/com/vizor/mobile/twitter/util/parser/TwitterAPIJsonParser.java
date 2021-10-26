@@ -1,10 +1,13 @@
 package com.vizor.mobile.twitter.util.parser;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.vizor.mobile.twitter.ConfigRule;
 import com.vizor.mobile.twitter.Rule;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TwitterAPIJsonParser {
@@ -13,11 +16,20 @@ public class TwitterAPIJsonParser {
         return jsonObject.get("access_token").getAsString();
     }
 
-    public static List<String> parseJsonWithRules(String json, List<String> rules) {
+    public static List<Rule> parseJsonWithRules(String json) {
+        List<Rule> rules = new ArrayList<>();
         if (null != json) {
             JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
-            for (JsonElement je : jsonObject.getAsJsonArray()) {
-                rules.add(je.getAsString());
+            JsonArray array = jsonObject.getAsJsonArray("data");
+            if (array != null) {
+                for (JsonElement element : array) {
+                    JsonObject object = element.getAsJsonObject();
+                    ConfigRule configRule = new ConfigRule();
+                    configRule.setId(object.get("id").getAsString());
+                    configRule.setTag(object.get("tag").getAsString());
+                    configRule.setValue(object.get("value").getAsString());
+                    rules.add(configRule);
+                }
             }
         }
         return rules;

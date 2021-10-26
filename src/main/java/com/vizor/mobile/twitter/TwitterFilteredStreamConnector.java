@@ -68,14 +68,14 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector{
 
 
     private void setupRules(String bearerToken, List<Rule> rules) {
-        List<String> existingRules = getRules(bearerToken);
+        List<Rule> existingRules = getRules(bearerToken);
         if (existingRules.size() > 0) {
             deleteRules(bearerToken, existingRules);
         }
         createRules(bearerToken, rules);
     }
 
-    private void deleteRules(String bearerToken, List<String> existingRules){
+    private void deleteRules(String bearerToken, List<Rule> existingRules){
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
@@ -110,8 +110,8 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector{
         }
     }
 
-    public List<String> getRules(String bearerToken){
-        List<String> rules = new ArrayList<>();
+    public List<Rule> getRules(String bearerToken){
+        List<Rule> rules = new ArrayList<>();
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
@@ -123,7 +123,7 @@ public class TwitterFilteredStreamConnector implements TwitterStreamConnector{
             HttpResponse<String> response = client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
             String body = response.body();
             System.out.println("This is the body : " + body);            //todo
-//           rules = TwitterAPIJsonParser.parseJsonWithRules(body, rules);
+           rules = TwitterAPIJsonParser.parseJsonWithRules(body);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
